@@ -5,7 +5,7 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 
 from flask_ckeditor import CKEditor, CKEditorField
-from forms import CreatePostForm, RegisterForm
+from forms import CreatePostForm, RegisterForm, LoginForm
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -21,6 +21,15 @@ Bootstrap(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 ##CONFIGURE TABLE
@@ -43,9 +52,9 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(1000))
 
 
-with app.app_context():
-    db.create_all()
-    print("db created")
+# with app.app_context():
+#     db.create_all()
+#     print("db created")
 
 
 @app.route('/')
@@ -127,6 +136,22 @@ def register():
         return redirect(url_for("get_all_posts"))
 
     return render_template("register.html", form=form)
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+
+        user = User.query.filter_by(email=email).first()
+
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for("get_all_posts"))
+
+    return render_template("login.html", form=form)
 
 
 @app.route('/about')
