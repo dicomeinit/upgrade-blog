@@ -60,7 +60,7 @@ class User(UserMixin, db.Model):
 @app.route('/')
 def get_all_posts():
     posts = BlogPost.query.all()
-    return render_template("index.html", all_posts=posts)
+    return render_template("index.html", all_posts=posts, current_user=current_user)
 
 
 @app.route("/post/<int:post_id>")
@@ -120,7 +120,9 @@ def delete_post(post_id):
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+
         if User.query.filter_by(email=form.email.data).first():
+            print(User.query.filter_by(email=form.email.data).first())
             # Send flash messsage
             flash("You've already signed up with that email, log in instead!")
             # Redirect to /login route.
@@ -141,7 +143,7 @@ def register():
         login_user(new_user)
         return redirect(url_for("get_all_posts"))
 
-    return render_template("register.html", form=form)
+    return render_template("register.html", form=form, current_user=current_user)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -160,12 +162,16 @@ def login():
             flash('Password incorrect, please try again.')
             return redirect(url_for("login"))
         else:
-            load_user(user)
+            login_user(user)
             return redirect(url_for("get_all_posts"))
 
+    return render_template("login.html", form=form, current_user=current_user)
 
-    return render_template("login.html", form=form)
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('get_all_posts'))
 
 @app.route('/about')
 def about():
