@@ -64,9 +64,15 @@ class BlogPost(db.Model):
     img_url = db.Column(db.String(250), nullable=False)
 
 
-# with app.app_context():
-#     db.create_all()
-#     print("db created")
+class Comment(db.Model):
+    __tablename__ = "comments"
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+
+
+with app.app_context():
+    db.create_all()
+    print("db created")
 
 
 @app.route('/')
