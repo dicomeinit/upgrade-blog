@@ -15,3 +15,5 @@ Flask-SQLAlchemy==3.0.2
 Flask-WTF==1.0.1
 WTForms==3.0.1
 flask-ckeditor==0.4.6
+
+SQLAlchemy~=1.4.43
